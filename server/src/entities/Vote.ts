@@ -23,7 +23,7 @@ export default class Sub extends BaseEntity {
     post: Post;
 
     @Column({nullable: true})
-    commentID: number;
+    commentId: number;
 
     @ManyToOne(() => Comment)
     comment: Comment
