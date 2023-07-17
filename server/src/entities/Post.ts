@@ -1,10 +1,11 @@
 import { Exclude, Expose } from 'class-transformer';
 import { BeforeInsert, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { makeId, slugify } from '../utils/helpers';
+import { User } from './User';
+import { transliterate } from 'transliteration';
 import Comment from './Comment';
 import BaseEntity from './Entity';
 import Sub from './Sub';
-import { User } from './User';
 import Vote from './Vote';
 
 @Entity("posts")
@@ -66,7 +67,8 @@ export default class Post extends BaseEntity {
 
     @BeforeInsert()
     makeIdAndSlug() {
-        this.identifier = makeId(7);
-        this.slug = slugify(this.title);
-    }
+    this.identifier = makeId(7);
+    const transliteratedTitle = transliterate(this.title);
+    this.slug = slugify(transliteratedTitle);
+}
 }

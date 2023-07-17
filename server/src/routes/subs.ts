@@ -17,6 +17,20 @@ const getSub = async (req: Request, res: Response) => {
     try {
         const sub = await Sub.findOneByOrFail({name});
 
+        // 포스트 생성 후에 해당 sub에 속하는 포스트 정보들을 넣어주기 (커뮤니티 내에서만 생성한거)
+        const posts = await Post.find({
+            where: {subName: sub.name},
+            order: {createdAt: 'DESC'},
+            relations: ["comments", "votes"]
+        })
+
+        sub.posts = posts;
+        
+        if (res.locals.user) {
+            sub.posts.forEach((p) => p.setUserVote(res.locals.user));
+        }
+        console.log("sub", sub);
+
         return res.json(sub);
             
     } catch (error) {
@@ -71,6 +85,7 @@ const createSub = async (req: Request, res: Response, next) => {
 // https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y
 
 const topSubs = async (req: Request, res: Response) => {
+    console.log('topSubs')
     try {
         const imageUrlExp = `COALESCE('${process.env.APP_URL}/images/' || s."imageUrn",'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y')`;
         const subs = await AppDataSource.createQueryBuilder()
@@ -173,9 +188,9 @@ const topSubs = async (req: Request, res: Response) => {
     }
 const router = Router(); 
 
+router.get("/sub/topSubs", topSubs);
 router.get("/:name", userMiddleware, getSub);
 router.post("/", userMiddleware, authMiddleware, createSub);
-router.get("/sub/topSubs", topSubs);
 router.post(
     "/:name/upload",
     userMiddleware,

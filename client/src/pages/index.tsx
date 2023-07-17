@@ -19,7 +19,7 @@ const Home: NextPage = () => {
 
   const {data: topSubs} = useSWR<Sub[]>(address, fetcher);
   
-  console.log('topSubs', topSubs)
+  // console.log('topSubs', topSubs)
 
   return (
     <div className="flex max-w-5xl px-4 mx-auto">
