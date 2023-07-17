@@ -10,7 +10,7 @@ import React from 'react'
 
 interface PostCardProps {
     post: Post
-    subMutate: ()=>void
+    subMutate?: ()=>void
     mutate?: ()=>void
 }
 
@@ -34,7 +34,7 @@ const PostCard = ({
 }: PostCardProps) => {
     const router = useRouter()
     const isInSubPage = router.pathname === `/r/${sub}`
-    console.log('router.pathname', router.pathname);
+   
 
     const {authenticated} = useAuthState();
 

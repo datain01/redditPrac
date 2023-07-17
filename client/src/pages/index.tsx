@@ -1,12 +1,13 @@
+import PostCard from "@/components/PostCard";
 import { useAuthState } from "@/context/auth";
-import { Sub } from "@/types";
+import { Post, Sub } from "@/types";
 import axios from "axios";
 import { NextPage } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
-
-
+import useSWRInfinite from 'swr/infinite';
 
 
 const Home: NextPage = () => {
@@ -17,14 +18,63 @@ const Home: NextPage = () => {
   }
   const address ="http://localhost:4000/api/subs/sub/topSubs";
 
+  const getKey = (pageIndex:number, previousPageData:Post[]) => {
+    if(previousPageData && !previousPageData.length) return null;
+    return `/posts?page=${pageIndex}`;
+  }
+
+  const {data, error, size:page, setSize: setPage, isValidating, mutate } = useSWRInfinite<Post[]>(getKey);
+  const isInitialLoading = !data && !error;
+  const posts: Post[] = data ? ([] as Post[]).concat(...data) : [];
+
   const {data: topSubs} = useSWR<Sub[]>(address, fetcher);
-  
-  // console.log('topSubs', topSubs)
+
+  const [observedPost, setObservedPost] = useState("");
+
+  useEffect(() => {
+    // 포스트가 없다면 return
+    if (!posts || posts.length === 0) return;
+    // posts 배열 안에 마지막 post에 id를 가져옵니다.
+    const id = posts[posts.length - 1].identifier;
+    // posts 배열에 post가 추가돼서 마지막 post가 바뀌었다면,
+    // 바뀐 post중 마지막 post를 observedPost로 
+    if (id !== observedPost) {
+      setObservedPost(id);
+      observeElement(document.getElementById(id));
+    }
+  },[posts])
+
+  const observeElement = (element: HTMLElement | null) => {
+    if (!element) return;
+    // 브라우저 뷰포트(ViewPort)와 설정한 요소 (Element)의 교차점을 관찰
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // isIntersecting: 관찰 대상의 교차 상태(Boolean)
+        if (entries[0].isIntersecting === true){
+          console.log("마지막 포스트에 왔습니다.");
+          setPage(page + 1);
+          observer.unobserve(element);
+        }
+      },
+      {threshold: 1} //뷰포트에 다 들어갔을때 실행
+    );
+    // 대상 요소의 관찰을 시작
+    observer.observe(element);
+  }
 
   return (
     <div className="flex max-w-5xl px-4 mx-auto">
       {/* 포스트 리스트 */}
-      <div className="w-full md:mr-3 md:w-8/12"> {/* 창 사이즈에 따라 크기 조절 */}</div>        
+      <div className="w-full md:mr-3 md:w-8/12"> {/* 창 사이즈에 따라 크기 조절 */}
+        {isInitialLoading && <p className="text-lg text-center"> 로딩중입니다......</p>}
+        {posts?.map(post => (
+          <PostCard
+          key = {post.identifier}
+          post = {post}
+          mutate={mutate}
+          />
+        ))}
+      </div>        
         
         {/* 사이드 바 */}
         <div className="hidden w-4/12 ml-3 md:block">
