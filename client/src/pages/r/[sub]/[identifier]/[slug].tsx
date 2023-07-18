@@ -134,7 +134,7 @@ const PostPage = () => {
                                 {authenticated ? (
                                     <div>
                                         <p className='mb-1 text-xs'>
-                                        <Link href={`/u/${post.username}`}>
+                                        <Link href={`/u/${user?.username}`}>
                                         <span className='font-semibold text-blue-500'>
                                             {user?.username}
                                         </span>

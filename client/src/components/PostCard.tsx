@@ -33,7 +33,7 @@ const PostCard = ({
     subMutate
 }: PostCardProps) => {
     const router = useRouter()
-    const isInSubPage = router.pathname === `/r/${sub}`
+    const isInSubPage = router.pathname === "/r/[sub]"
    
 
     const {authenticated} = useAuthState();
@@ -110,7 +110,7 @@ const PostCard = ({
                     
                     <p className='text-xs text-gray-400'>
                         Posted by
-                        <Link href={`/r/${username}`}>
+                        <Link href={`/u/${username}`}>
                             <span className='mx-1 hover:underline'>/u/{username}</span>
                         </Link>
                         <Link href={url}>
